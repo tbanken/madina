@@ -127,6 +127,7 @@ class Zonal:
             redundant_edge_treatment: str ='discard',
             turn_threshold_degree: int | float = 45,
             turn_penalty_amount: int | float = 30,
+            allow_zero_weight: bool = False,
     ) -> None:
         """Create a topologically connected street network from a specified layer in the Zonal object.
 
@@ -187,7 +188,8 @@ class Zonal:
             geometry_gdf,
             weight_attribute=weight_attribute,
             tolerance=node_snapping_tolerance, 
-            source_layer=source_layer
+            source_layer=source_layer,
+            allow_zero_weight=allow_zero_weight
         )
 
         if redundant_edge_treatment == 'split':

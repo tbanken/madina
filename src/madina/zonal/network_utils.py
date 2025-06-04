@@ -7,7 +7,7 @@ from shapely.ops import split, snap
 
 # from pygeos.lib import get_x, get_y, get_point
 
-def node_edge_builder(geometry_gdf, weight_attribute=None, tolerance=0.0, source_layer: str =None):
+def node_edge_builder(geometry_gdf, weight_attribute=None, tolerance=0.0, source_layer: str =None,allow_zero_weight: bool=False):
     if tolerance == 0.0:
         # use vectorized implementaytion
         point_xy = GeoPandaExtractor(geometry_gdf.geometry.values.data)
@@ -28,8 +28,11 @@ def node_edge_builder(geometry_gdf, weight_attribute=None, tolerance=0.0, source
             {
                 "length": length,
                 "weight": length if weight_attribute is None else geometry_gdf.apply(
-                    lambda x: max(x[weight_attribute], 0.01) if x[weight_attribute] != 0 else x["geometry"].length,
-                    axis=1),
+                    lambda x: (x[weight_attribute] if allow_zero_weight
+                            else max(x[weight_attribute], 0.01) if x[weight_attribute] != 0
+                            else x["geometry"].length),
+                    axis=1
+                ),
                 "type": pd.Series(np.repeat(np.array(["street"], dtype=object), repeats=edge_count), fastpath=True,
                                   index=index, dtype="category"),
                 "parent_street_id": pd.Series(geometry_gdf.index.values,dtype=int,  fastpath=True, index=index),
